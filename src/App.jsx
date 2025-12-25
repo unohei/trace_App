@@ -33,7 +33,7 @@ function App() {
   }
 
   // ③ 通常画面
-  return <QuestionView />;
+  return <QuestionView origin={origin} />;
 }
 
 export default App;

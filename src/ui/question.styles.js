@@ -56,18 +56,46 @@ export const questionStyles = {
   },
   northStarWrapper: {
     position: "fixed",
-    top: "24px",
-    right: "24px",
+    top: "16px",
+    right: "16px",
     zIndex: 10,
   },
 
   northStar: {
-    width: "12px",
-    height: "12px",
+    width: "14px",
+    height: "14px",
     borderRadius: "50%",
     background: "rgba(255,255,255,0.9)",
     boxShadow: "0 0 12px rgba(255,255,255,0.8)",
     cursor: "pointer",
     animation: "northStarGlow 3s ease-in-out infinite",
+  },
+
+  originPopover: {
+    position: "absolute",
+    top: "24px",
+    right: "0",
+    width: "260px",
+    background: "rgba(10,15,30,0.95)",
+    border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: "12px",
+    padding: "16px",
+    color: "#eaeaea",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+  },
+
+  originTitle: {
+    fontSize: "12px",
+    letterSpacing: "0.15em",
+    opacity: 0.8,
+    marginBottom: "12px",
+  },
+
+  originList: {
+    listStyle: "none",
+    padding: 0,
+    margin: 0,
+    fontSize: "13px",
+    lineHeight: 1.6,
   },
 };
