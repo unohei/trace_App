@@ -1,0 +1,30 @@
+@keyframes northStarGlow {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.splash {
+  height: 100vh;
+  background: radial-gradient(circle at top, #1b2735, #090a0f);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #eaeaea;
+  text-align: center;
+}
+
+.moon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #f5f3ce;
+  box-shadow: 0 0 30px rgba(245, 243, 206, 0.4);
+}
