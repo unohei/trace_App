@@ -1,4 +1,6 @@
-<img src="screenshots/splash.png" width="50%" />
+<p align="center">
+  <img src="screenshots/splash.png" width="50%" />
+</p>
 
 # TRACE
 
@@ -15,14 +17,18 @@ TRACE は
 
 ## できること
 
-<img src="screenshots/question.png" width="50%" />
+<p align="center">
+  <img src="screenshots/question.png" width="50%" />
+</p>
 
 - 今週の距離感を「言葉」で置く
 - ひとつの問いに、短く答える
 - 距離とことばの関係を、余韻として残す
 - これまでの一歩を、静かな履歴として振り返る
 
-<img src="screenshots/history.png" width="50%" />
+<p align="center">
+  <img src="screenshots/history.png" width="50%" />
+</p>
 
 ※ 前回と距離カテゴリが変わった週は  
 　月明かりに照らされるように表示されます。
@@ -40,7 +46,6 @@ TRACE は成長を測るツールではありません。
 ## 技術構成
 
 - React + Vite
-- Styling：JS styles + CSS（演出）
 - State 管理：useState / useMemo
 
 ---
