@@ -1,4 +1,4 @@
-![Splash](screenshots/splash.png)
+<img src="screenshots/splash.png" width="50%" />
 
 # TRACE
 
@@ -15,14 +15,14 @@ TRACE は
 
 ## できること
 
-![Question](screenshots/question.png)
+<img src="screenshots/question.png" width="50%" />
 
 - 今週の距離感を「言葉」で置く
 - ひとつの問いに、短く答える
 - 距離とことばの関係を、余韻として残す
 - これまでの一歩を、静かな履歴として振り返る
 
-![History](screenshots/history.png)
+<img src="screenshots/history.png" width="50%" />
 
 ※ 前回と距離カテゴリが変わった週は  
 　月明かりに照らされるように表示されます。
