@@ -1,16 +1,52 @@
-# React + Vite
+![Splash](screenshots/splash.png)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# TRACE
 
-Currently, two official plugins are available:
+迷いは消えない。  
+でも、軌跡は残る。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+TRACE は  
+**自分の現在地を評価せずに、静かに記録するための Web アプリ**です。
 
-## React Compiler
+近い・遠いに正解はありません。  
+今週の距離感と言葉を、そのまま残していきます。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## できること
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+![Question](screenshots/question.png)
+
+- 今週の距離感を「言葉」で置く
+- ひとつの問いに、短く答える
+- 距離とことばの関係を、余韻として残す
+- これまでの一歩を、静かな履歴として振り返る
+
+![History](screenshots/history.png)
+
+※ 前回と距離カテゴリが変わった週は  
+　月明かりに照らされるように表示されます。
+
+---
+
+## コンセプト
+
+TRACE は成長を測るツールではありません。  
+評価せず、比較せず、  
+**ただ「歩いた事実」を残す**ためのアプリです。
+
+---
+
+## 技術構成
+
+- React + Vite
+- Styling：JS styles + CSS（演出）
+- State 管理：useState / useMemo
+
+---
+
+## これから
+
+- 原点の再定義
+- 長期的な軌跡の可視化
+- 保存・共有機能
