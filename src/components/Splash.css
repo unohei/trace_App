@@ -1,30 +1,117 @@
+/* src/Splash.css */
+
+/* 月：呼吸する光（box-shadow + ほんの少し拡大で“動き”が分かる） */
+@keyframes moonGlow {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+    box-shadow: 0 0 22px rgba(255, 224, 160, 0.22),
+      0 0 60px rgba(255, 210, 140, 0.14), 0 0 140px rgba(255, 195, 120, 0.08);
+  }
+  50% {
+    transform: scale(1.03);
+    filter: brightness(1.06);
+    box-shadow: 0 0 34px rgba(255, 224, 160, 0.42),
+      0 0 90px rgba(255, 210, 140, 0.26), 0 0 190px rgba(255, 195, 120, 0.14);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+    box-shadow: 0 0 22px rgba(255, 224, 160, 0.22),
+      0 0 60px rgba(255, 210, 140, 0.14), 0 0 140px rgba(255, 195, 120, 0.08);
+  }
+}
+
+/* 北極星：控えめ点滅 */
 @keyframes northStarGlow {
   0% {
-    opacity: 0.6;
+    opacity: 0.55;
+    transform: scale(1);
   }
   50% {
     opacity: 1;
+    transform: scale(1.12);
   }
   100% {
-    opacity: 0.6;
+    opacity: 0.55;
+    transform: scale(1);
   }
 }
 
-.splash {
-  height: 100vh;
-  background: radial-gradient(circle at top, #1b2735, #090a0f);
+/* 画面全体 */
+.splashRoot {
+  min-height: 100vh;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  color: #eaeaea;
+  align-items: center;
   text-align: center;
+
+  color: #eaeaea;
+  background: radial-gradient(circle at top, #1b2735, #090a0f);
+
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
 }
 
+/* 月：白寄り + 周縁だけほんのり黄 */
 .moon {
+  position: absolute;
+  top: 10%;
+  right: 15%;
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: #f5f3ce;
-  box-shadow: 0 0 30px rgba(245, 243, 206, 0.4);
+
+  /* “白っぽい”中心に寄せる */
+  background: radial-gradient(
+    circle at 30% 30%,
+    #fffdf7 0%,
+    #fff4da 45%,
+    #f3d58a 78%,
+    #e7c46b 100%
+  );
+
+  animation: moonGlow 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 北極星 */
+.northStar {
+  position: absolute;
+  top: 18%;
+  left: 20%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6),
+    0 0 22px rgba(255, 255, 255, 0.25);
+
+  animation: northStarGlow 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* タイトル */
+.splashLogo {
+  font-size: 32px;
+  letter-spacing: 0.2em;
+  margin: 0 0 24px 0;
+}
+
+/* コピー */
+.splashCopy {
+  font-size: 18px;
+  line-height: 1.8;
+  opacity: 0.86;
+  margin: 0;
+}
+
+/* 小さなヒント */
+.splashHint {
+  margin-top: 18px;
+  font-size: 12px;
+  opacity: 0.45;
 }

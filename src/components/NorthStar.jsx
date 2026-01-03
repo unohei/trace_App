@@ -3,39 +3,31 @@ import { questionStyles as styles } from "../ui/question.styles";
 
 function NorthStar({ origin }) {
   const [open, setOpen] = useState(false);
-
-  // origin がまだ無い場合は表示しない（保険）
   if (!origin) return null;
 
   return (
     <div style={styles.northStarWrapper}>
-      {/* 北極星そのもの */}
       <div
         style={styles.northStar}
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((o) => !o)}
         title="原点を見る"
       />
 
-      {/* 原点ポップオーバー */}
       {open && (
         <div style={styles.originPopover}>
-          <p style={styles.originTitle}>✦ 原点</p>
-
+          <p style={styles.originTitle}>✦ 今のあなたの原点</p>
           <ul style={styles.originList}>
             <li>
-              <strong>ワクワク</strong>
-              <br />
-              {origin.joy}
+              <span>①</span>
+              <p>{origin.joy}</p>
             </li>
             <li>
-              <strong>怒られても</strong>
-              <br />
-              {origin.stubborn}
+              <span>②</span>
+              <p>{origin.stubborn}</p>
             </li>
             <li>
-              <strong>没頭</strong>
-              <br />
-              {origin.immerse}
+              <span>③</span>
+              <p>{origin.immerse}</p>
             </li>
           </ul>
         </div>
