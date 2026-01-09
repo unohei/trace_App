@@ -18,15 +18,15 @@ function NorthStar({ origin }) {
           <p style={styles.originTitle}>✦ 今のあなたの原点</p>
           <ul style={styles.originList}>
             <li>
-              <span>人生で最も「ワクワク」したこと。</span>
+              <span>①人生で最も「ワクワク」</span>
               <p>{origin.joy}</p>
             </li>
             <li>
-              <span>怒られてもやりたい（やりたくない）こと</span>
+              <span>②怒られてもやりたい（やりたくない）</span>
               <p>{origin.stubborn}</p>
             </li>
             <li>
-              <span>長く没頭できること</span>
+              <span>③長く没頭できる</span>
               <p>{origin.immerse}</p>
             </li>
           </ul>
