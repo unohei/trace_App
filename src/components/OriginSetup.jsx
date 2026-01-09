@@ -23,16 +23,18 @@ function OriginSetup({ onComplete }) {
         </p>
 
         {/* ① ワクワク */}
-        <label style={styles.label}>人生でとてもワクワクしたこと</label>
+        <label style={styles.label}>人生で最も「ワクワク」したこと</label>
         <textarea
           style={styles.textarea}
           value={origin.joy}
           onChange={(e) => setOrigin({ ...origin, joy: e.target.value })}
-          placeholder="あの時、時間を忘れていたこと"
+          placeholder="あの時の、時間を忘れることができないこと"
         />
 
         {/* ② 怒られてもやりたい */}
-        <label style={styles.label}>怒られてもやりたかったこと</label>
+        <label style={styles.label}>
+          怒られてもやりたい（やりたくない）こと
+        </label>
         <textarea
           style={styles.textarea}
           value={origin.stubborn}
@@ -41,7 +43,7 @@ function OriginSetup({ onComplete }) {
         />
 
         {/* ③ 没頭できる */}
-        <label style={styles.label}>長く没頭できること</label>
+        <label style={styles.label}>とても長く没頭できること</label>
         <textarea
           style={styles.textarea}
           value={origin.immerse}
