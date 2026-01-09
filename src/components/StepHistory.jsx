@@ -1,52 +1,118 @@
+import { useEffect, useMemo, useState } from "react";
 import { getDistance, interpretDistance } from "../utils/originDistance";
 
-function StepHistory({ steps = [] }) {
+function StepHistory({ steps = [], onBackToSplash, scrollContainerId }) {
   if (!steps || steps.length === 0) return null;
 
-  // 比較用：古い→新しい
-  const chrono = [...steps].sort((a, b) => a.id - b.id);
+  // 変化判定（古い→新しい）
+  const chrono = useMemo(() => [...steps].sort((a, b) => a.id - b.id), [steps]);
 
-  // 「距離カテゴリが前回と変わった」判定（id → boolean）
-  const changedMap = new Map();
-  for (let i = 0; i < chrono.length; i++) {
-    const cur = chrono[i];
-    const prev = chrono[i - 1];
-
-    if (!prev) {
-      changedMap.set(cur.id, false);
-      continue;
+  const changedMap = useMemo(() => {
+    const m = new Map();
+    for (let i = 0; i < chrono.length; i++) {
+      const cur = chrono[i];
+      const prev = chrono[i - 1];
+      if (!prev) {
+        m.set(cur.id, false);
+        continue;
+      }
+      const curKey = cur.distanceBand ?? cur.distanceLabel ?? "";
+      const prevKey = prev.distanceBand ?? prev.distanceLabel ?? "";
+      m.set(cur.id, curKey !== prevKey);
     }
-
-    const curKey = cur.distanceBand ?? cur.distanceLabel ?? "";
-    const prevKey = prev.distanceBand ?? prev.distanceLabel ?? "";
-    changedMap.set(cur.id, curKey !== prevKey);
-  }
+    return m;
+  }, [chrono]);
 
   // 表示は新しい順
-  const display = [...chrono].sort((a, b) => b.id - a.id);
+  const display = useMemo(
+    () => [...chrono].sort((a, b) => b.id - a.id),
+    [chrono]
+  );
+
+  // スクロールしたら「トップに戻る」を出す
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    if (!scrollContainerId) return;
+    const el = document.getElementById(scrollContainerId);
+    if (!el) return;
+
+    const onScroll = () => {
+      setShowBackToTop(el.scrollTop > 120);
+    };
+
+    onScroll();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [scrollContainerId]);
+
+  const scrollToTop = () => {
+    const el = document.getElementById(scrollContainerId);
+    if (!el) return;
+    el.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleRightLinkClick = () => {
+    if (showBackToTop) {
+      scrollToTop(); // ★ ここで実行する（returnしない）
+      return;
+    }
+    if (typeof onBackToSplash === "function") onBackToSplash();
+  };
 
   return (
     <section
       style={{
-        marginTop: 32,
+        marginTop: 16,
         maxWidth: 480,
         marginLeft: "auto",
         marginRight: "auto",
         padding: "0 4px",
+        paddingBottom: 80, // ★ 下の余白（最後が被らない保険）
       }}
     >
-      <h3 style={{ fontSize: 14, marginBottom: 16, opacity: 0.8 }}>
-        これまでの一歩
-      </h3>
+      {/* タイトル行（右側リンクは1つだけ） */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        <h3 style={{ fontSize: 14, opacity: 0.8, margin: 0 }}>
+          これまでの一歩
+        </h3>
+
+        {typeof onBackToSplash === "function" && (
+          <button
+            type="button"
+            onClick={handleRightLinkClick}
+            style={{
+              border: "none",
+              background: "transparent",
+              padding: 0,
+              fontSize: 12,
+              opacity: 0.7,
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              color: "rgba(255,248,230,0.85)",
+            }}
+          >
+            {showBackToTop ? "トップに戻る" : "スプラッシュに戻る"}
+          </button>
+        )}
+      </div>
 
       <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
         {display.map((step) => {
-          // label/message が無い場合だけフォールバック（保険）
           let label = step.distanceLabel;
           let message = step.distanceMessage;
 
           if (!label || !message) {
-            // 旧構造互換：point があるなら距離算出、なければ中間扱い
             const d = step.point
               ? getDistance(step.point)
               : step.distanceValue ?? 3.2;
@@ -55,12 +121,11 @@ function StepHistory({ steps = [] }) {
             message = message ?? it.message;
           }
 
-          const isLit = Boolean(changedMap.get(step.id));
-
-          // ★ 回答（保険で複数候補を見る）
           const answerRaw =
             step.answer ?? step.response ?? step.text ?? step.comment ?? "";
           const answer = String(answerRaw).trim();
+
+          const isLit = Boolean(changedMap.get(step.id));
 
           return (
             <li
@@ -70,12 +135,8 @@ function StepHistory({ steps = [] }) {
                 marginBottom: 18,
                 padding: "16px 16px",
                 borderRadius: 18,
-
-                // ★ 月色ベース（グラデーションなし）
                 background: "rgba(255,248,230,0.06)",
                 border: "1px solid rgba(255,220,150,0.18)",
-
-                // ★ 月明かりのにじみ（変化した週だけ少し強い）
                 boxShadow: isLit
                   ? `
                     0 10px 28px rgba(0,0,0,0.20),
@@ -83,15 +144,12 @@ function StepHistory({ steps = [] }) {
                     0 0 84px rgba(255,200,120,0.16)
                   `
                   : "0 10px 28px rgba(0,0,0,0.25)",
-
                 overflow: "hidden",
                 transition: "box-shadow 0.6s ease",
               }}
             >
-              {/* 月明かり（全体をやさしく照らす） */}
               {isLit && (
                 <>
-                  {/* うっすら面で照らす */}
                   <div
                     style={{
                       position: "absolute",
@@ -101,7 +159,6 @@ function StepHistory({ steps = [] }) {
                       pointerEvents: "none",
                     }}
                   />
-                  {/* ほんのり上から当たってる感じ（左右均等） */}
                   <div
                     style={{
                       position: "absolute",
@@ -131,7 +188,6 @@ function StepHistory({ steps = [] }) {
                 {message}
               </div>
 
-              {/* ★ 問いの回答（ここが追加点） */}
               {answer && (
                 <div
                   style={{

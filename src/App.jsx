@@ -7,12 +7,9 @@ function App() {
   const [isSplash, setIsSplash] = useState(true);
   const [origin, setOrigin] = useState(null);
 
-  // 初回だけ localStorage から原点を読む
   useEffect(() => {
     const saved = localStorage.getItem("origin");
-    if (saved) {
-      setOrigin(JSON.parse(saved));
-    }
+    if (saved) setOrigin(JSON.parse(saved));
   }, []);
 
   // ① Splash
@@ -33,7 +30,14 @@ function App() {
   }
 
   // ③ 通常画面
-  return <QuestionView origin={origin} />;
+  return (
+    <QuestionView
+      origin={origin}
+      onBackToSplash={() => {
+        setIsSplash(true);
+      }}
+    />
+  );
 }
 
 export default App;

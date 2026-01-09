@@ -1,10 +1,27 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { questionStyles as styles } from "../ui/question.styles";
 import NorthStar from "./NorthStar";
 import StepHistory from "./StepHistory";
 import { interpretDistance } from "../utils/originDistance";
+import { recommendBand } from "../utils/recommendBand";
 
-function QuestionView({ origin }) {
+const STEPS_KEY = "trace_steps_v1";
+const HISTORY_SCROLL_ID = "historyScrollArea";
+
+function safeParse(raw) {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function clampBand(band) {
+  return Math.max(0, Math.min(2, band));
+}
+
+function QuestionView({ origin, onBackToSplash }) {
   const [answer, setAnswer] = useState("");
   const [steps, setSteps] = useState([]);
 
@@ -12,14 +29,42 @@ function QuestionView({ origin }) {
   const [phase, setPhase] = useState("input");
   const [fadeOut, setFadeOut] = useState(false);
 
-  // 0:近い 1:中間 2:遠い（評価ではなく現在地）
-  const [distanceBand, setDistanceBand] = useState(1);
+  // 保存時に確定した余韻（after表示に使う）
+  const [afterBand, setAfterBand] = useState(1);
+  const [afterLabel, setAfterLabel] = useState("");
+  const [afterMessage, setAfterMessage] = useState("");
 
-  // バンド → 仮距離（interpretDistanceに渡す）
+  const hasLoadedRef = useRef(false);
+
+  useEffect(() => {
+    const raw = localStorage.getItem(STEPS_KEY);
+    const restored = raw ? safeParse(raw) : [];
+    setSteps(restored);
+    hasLoadedRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedRef.current) return;
+    const id = window.requestAnimationFrame(() => {
+      try {
+        localStorage.setItem(STEPS_KEY, JSON.stringify(steps));
+      } catch (e) {
+        console.warn("Failed to save steps to localStorage", e);
+      }
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [steps]);
+
+  const recommendedBand = useMemo(() => {
+    const trimmed = String(answer).trim();
+    const rec = recommendBand(trimmed);
+    return clampBand(rec ?? 1);
+  }, [answer]);
+
   const distanceValue = useMemo(() => {
     const table = [1.2, 3.2, 6.0];
-    return table[Math.max(0, Math.min(2, distanceBand))];
-  }, [distanceBand]);
+    return table[recommendedBand];
+  }, [recommendedBand]);
 
   const interpretation = useMemo(
     () => interpretDistance(distanceValue),
@@ -36,112 +81,96 @@ function QuestionView({ origin }) {
     return "遠くまで来た一歩。\n今週の経験は、きっと力になります。";
   };
 
-  const resetForNextWeek = () => {
+  const goToInput = () => {
     setAnswer("");
     setFadeOut(false);
     setPhase("input");
+  };
+
+  const clearHistory = () => {
+    if (!window.confirm("履歴をすべて消しますか？（この端末のみ）")) return;
+    setSteps([]);
+    try {
+      localStorage.removeItem(STEPS_KEY);
+    } catch (e) {
+      console.warn("Failed to remove steps from localStorage", e);
+    }
+    goToInput();
+  };
+
+  const onSave = () => {
+    const trimmed = String(answer).trim();
+    if (!trimmed) return;
+
+    const band = clampBand(recommendedBand);
+    const table = [1.2, 3.2, 6.0];
+    const val = table[band];
+    const it = interpretDistance(val);
+
+    const newStep = {
+      id: Date.now(),
+      createdAt: new Date().toLocaleString(),
+      answer: trimmed,
+      distanceBand: band,
+      distanceValue: val,
+      distanceLabel: it.label,
+      distanceMessage: it.message,
+    };
+
+    setAfterBand(band);
+    setAfterLabel(it.label);
+    setAfterMessage(getAfterMessage(band));
+
+    setSteps((prev) => [...prev, newStep]);
+
+    setPhase("after");
+    setFadeOut(false);
+    setAnswer("");
+
+    setTimeout(() => setFadeOut(true), 3500);
+    setTimeout(() => setPhase("history"), 5200);
   };
 
   return (
     <main style={styles.next}>
       <NorthStar origin={origin} />
 
-      {/* ===== 入力フェーズ ===== */}
+      {/* ===== 入力 ===== */}
       {phase === "input" && (
-        <>
-          {/* 距離メーター（言葉で置く） */}
-          <div style={styles.distanceBox}>
-            <p style={styles.distanceLabel}>今の距離感</p>
+        <div style={styles.card}>
+          <h2 style={styles.questionTitle}>今週の問い</h2>
+          <p style={styles.question}>
+            今週の自分を、原点に照らしてみてください。
+          </p>
 
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                marginTop: 8,
-                marginBottom: 10,
-              }}
-            >
-              {[
-                { label: "原点のすぐそば", band: 0 },
-                { label: "少し外側", band: 1 },
-                { label: "遠くまで来た", band: 2 },
-              ].map((item) => {
-                const active = item.band === distanceBand;
-                return (
-                  <button
-                    key={item.band}
-                    type="button"
-                    onClick={() => setDistanceBand(item.band)}
-                    style={{
-                      flex: 1,
-                      padding: "10px 10px",
-                      borderRadius: 16,
-                      border: active
-                        ? "1px solid rgba(255,255,255,0.45)"
-                        : "1px solid rgba(255,255,255,0.18)",
-                      background: active
-                        ? "rgba(255,255,255,0.08)"
-                        : "rgba(255,255,255,0.03)",
-                      color: "rgba(255,255,255,0.9)",
-                      fontSize: 12,
-                      opacity: active ? 1 : 0.75,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
+          <textarea
+            style={styles.textarea}
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder="今の気持ちを、そのまま"
+          />
 
-            <p style={styles.distanceMessage}>{interpretation.message}</p>
+          <button
+            style={styles.saveButton}
+            disabled={!String(answer).trim()}
+            onClick={onSave}
+          >
+            記録する
+          </button>
 
-            <p style={{ fontSize: 11, opacity: 0.45, marginTop: 10 }}>
-              ※ 近い・遠いに正解はありません。今の位置を置くだけです。
-            </p>
-          </div>
-
-          <div style={styles.card}>
-            <h2 style={styles.questionTitle}>今週の問い</h2>
-            <p style={styles.question}>先週の自分と比べて、どうでしたか？</p>
-
-            <textarea
-              style={styles.textarea}
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="今の気持ちを、そのまま"
-            />
-
+          {steps.length > 0 && (
             <button
-              style={styles.saveButton}
-              disabled={!answer.trim()}
-              onClick={() => {
-                const newStep = {
-                  id: Date.now(),
-                  createdAt: new Date().toLocaleString(),
-                  answer: answer.trim(),
-
-                  // 履歴で使う
-                  distanceBand,
-                  distanceValue,
-                  distanceLabel: interpretation.label,
-                  distanceMessage: interpretation.message,
-                };
-
-                setSteps((prev) => [...prev, newStep]);
-                setPhase("after");
-
-                setTimeout(() => setFadeOut(true), 3500);
-                setTimeout(() => setPhase("history"), 5200);
-              }}
+              type="button"
+              onClick={() => setPhase("history")}
+              style={{ ...styles.saveButton, marginTop: 12, opacity: 0.7 }}
             >
-              記録する
+              履歴を見る
             </button>
-          </div>
-        </>
+          )}
+        </div>
       )}
 
-      {/* ===== 余韻フェーズ ===== */}
+      {/* ===== 余韻 ===== */}
       {phase === "after" && (
         <div
           style={{
@@ -151,27 +180,66 @@ function QuestionView({ origin }) {
             textAlign: "center",
             marginTop: 40,
             whiteSpace: "pre-line",
+            maxWidth: 480,
+            marginLeft: "auto",
+            marginRight: "auto",
+            padding: "0 12px",
           }}
         >
           <p style={{ fontSize: 18, marginBottom: 12 }}>
-            {interpretation.label}
+            {afterLabel || interpretation.label}
           </p>
-          <p style={{ opacity: 0.8 }}>{getAfterMessage(distanceBand)}</p>
+          <p style={{ opacity: 0.8 }}>
+            {afterMessage || getAfterMessage(afterBand)}
+          </p>
         </div>
       )}
 
-      {/* ===== 履歴フェーズ ===== */}
+      {/* ===== 履歴 ===== */}
       {phase === "history" && (
-        <>
-          {/* ★ 常に見える「次の一歩」 */}
-          <div style={styles.historyTopBar}>
-            <button style={styles.historyButton} onClick={resetForNextWeek}>
-              次の一歩を残す
-            </button>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            padding: "48px 24px",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          {/* 上固定バー */}
+          <div style={{ maxWidth: 480, margin: "0 auto 10px", width: "100%" }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <button style={styles.historyButton} onClick={goToInput}>
+                問いに戻る
+              </button>
+
+              {/* 小さめ */}
+              <button
+                type="button"
+                style={styles.historyButtonDanger}
+                onClick={clearHistory}
+              >
+                履歴を消す
+              </button>
+            </div>
           </div>
 
-          <StepHistory steps={steps} />
-        </>
+          {/* スクロール領域（ここだけスクロール） */}
+          <div
+            id={HISTORY_SCROLL_ID}
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              paddingBottom: 24, // スクロール領域の保険
+            }}
+          >
+            <StepHistory
+              steps={steps}
+              onBackToSplash={onBackToSplash}
+              scrollContainerId={HISTORY_SCROLL_ID}
+            />
+          </div>
+        </div>
       )}
     </main>
   );

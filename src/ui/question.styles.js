@@ -142,4 +142,26 @@ export const questionStyles = {
     borderRadius: "24px",
     cursor: "pointer",
   },
+  // 追加：上バーの中身（横並び）
+  historyTopRow: {
+    width: "100%",
+    maxWidth: 480,
+    display: "flex",
+    gap: 10,
+    padding: "0 4px",
+    alignItems: "center",
+  },
+
+  // 微調整：履歴を消す（小さめ）
+  historyButtonDanger: {
+    padding: "10px 12px",
+    borderRadius: "24px",
+    border: "1px solid rgba(255,220,150,0.18)",
+    background: "rgba(255,248,230,0.04)",
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 12,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    width: "120px",
+  },
 };
