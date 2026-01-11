@@ -10,16 +10,16 @@ export const questionStyles = {
     margin: "0 auto",
   },
   questionTitle: {
-    fontSize: "13px", // ← 少し小さく
-    letterSpacing: "0.12em", // ← きつさを緩める
+    fontSize: "13px",
+    letterSpacing: "0.12em",
     opacity: 0.55,
     marginBottom: "12px",
   },
   question: {
-    fontSize: "21px", // ← 20 → 21 に
-    lineHeight: 1.7, // ← 1.8 → 1.7 に
-    fontWeight: 500, // ← 追加
-    marginBottom: "20px", // ← 少し余白
+    fontSize: "21px", //  20 → 21
+    lineHeight: 1.7, // 1.8 → 1.7
+    fontWeight: 500,
+    marginBottom: "20px", // 少し余白に
   },
   textarea: {
     width: "100%",
@@ -27,9 +27,9 @@ export const questionStyles = {
     background: "rgba(255,255,255,0.05)",
     border: "1px solid rgba(255,255,255,0.1)",
     borderRadius: "8px",
-    padding: "14px", // ← 12 → 14
+    padding: "14px", // 12 → 14
     color: "#eaeaea",
-    fontSize: "16px", // ← これは維持（重要）
+    fontSize: "16px",
     lineHeight: 1.7,
     marginBottom: "24px",
   },
@@ -57,48 +57,55 @@ export const questionStyles = {
     cursor: "pointer",
   },
   northStarWrapper: {
-    position: "fixed",
-    top: "16px",
-    right: "16px",
-    zIndex: 10,
+    position: "absolute",
+    top: 18,
+    left: 18,
+    zIndex: 40,
   },
 
   northStar: {
     width: "14px",
     height: "14px",
     borderRadius: "50%",
-    background: "rgba(255,255,255,0.9)",
-    boxShadow: "0 0 12px rgba(255,255,255,0.8)",
+    background: "rgba(255,255,255,0.92)",
+    boxShadow: "0 0 12px rgba(255,255,255,0.85)",
     cursor: "pointer",
     animation: "northStarGlow 3s ease-in-out infinite",
   },
 
   originPopover: {
     position: "absolute",
-    top: "48px",
-    right: "0",
-    width: "280px",
-    background: "rgba(20, 24, 40, 0.85)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: "12px",
-    padding: "16px",
-    backdropFilter: "blur(8px)",
+    top: "44px",
+    left: "0",
+    width: "320px",
+    maxWidth: "78vw",
+
+    background: "rgba(10, 12, 18, 0.88)",
+    border: "1px solid rgba(255,220,150,0.18)",
+    borderRadius: "14px",
+    padding: "14px 14px 12px",
+    backdropFilter: "blur(10px)",
+
+    boxShadow: `
+      0 14px 32px rgba(0,0,0,0.40),
+      0 0 42px rgba(255,220,150,0.10)
+    `,
   },
 
   originTitle: {
-    fontSize: "12px",
-    letterSpacing: "0.15em",
-    opacity: 0.8,
-    marginBottom: "12px",
+    fontSize: "13px",
+    letterSpacing: "0.10em",
+    opacity: 0.9,
+    margin: 0,
+    marginBottom: "10px",
   },
 
   originList: {
     listStyle: "none",
     padding: 0,
     margin: 0,
-    fontSize: "13px",
-    lineHeight: 1.6,
   },
+
   distanceBox: {
     marginTop: "24px",
     padding: "12px 16px",
@@ -136,7 +143,7 @@ export const questionStyles = {
   historyButton: {
     width: "100%",
     padding: "12px",
-    background: "rgba(255,248,230,0.06)", // 月色寄り
+    background: "rgba(255,248,230,0.06)", // 月色調整場所
     border: "1px solid rgba(255,220,150,0.22)",
     color: "rgba(255,255,255,0.9)",
     borderRadius: "24px",
@@ -152,7 +159,7 @@ export const questionStyles = {
     alignItems: "center",
   },
 
-  // 微調整：履歴を消す（小さめ）
+  // 微調整：履歴を消す
   historyButtonDanger: {
     padding: "10px 12px",
     borderRadius: "24px",

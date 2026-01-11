@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getDistance, interpretDistance } from "../utils/originDistance";
 
 function StepHistory({ steps = [], onBackToSplash, scrollContainerId }) {
-  if (!steps || steps.length === 0) return null;
+  if (!Array.isArray(steps) || steps.length === 0) return null;
 
   // 変化判定（古い→新しい）
   const chrono = useMemo(() => [...steps].sort((a, b) => a.id - b.id), [steps]);
@@ -32,43 +32,97 @@ function StepHistory({ steps = [], onBackToSplash, scrollContainerId }) {
   // スクロールしたら「トップに戻る」を出す
   const [showBackToTop, setShowBackToTop] = useState(false);
 
+  // スクロール監視対象を「scrollContainerId優先」→ 取れなければ window にフォールバック
   useEffect(() => {
-    if (!scrollContainerId) return;
-    const el = document.getElementById(scrollContainerId);
-    if (!el) return;
+    let targetEl = null;
+    let remove = null;
 
-    const onScroll = () => {
-      setShowBackToTop(el.scrollTop > 120);
+    const attach = () => {
+      // まずは指定IDの要素を探す
+      if (scrollContainerId) {
+        targetEl = document.getElementById(scrollContainerId);
+      }
+
+      // 取れない場合は window スクロールとして扱う（環境差/レイアウト崩れの保険）
+      const useWindow = !targetEl;
+
+      const handler = () => {
+        const y = useWindow
+          ? window.scrollY || document.documentElement.scrollTop || 0
+          : targetEl.scrollTop;
+
+        setShowBackToTop(y > 120);
+      };
+
+      handler();
+
+      if (useWindow) {
+        window.addEventListener("scroll", handler, { passive: true });
+        remove = () => window.removeEventListener("scroll", handler);
+      } else {
+        targetEl.addEventListener("scroll", handler, { passive: true });
+        remove = () => targetEl.removeEventListener("scroll", handler);
+      }
     };
 
-    onScroll();
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
+    // 要素取得タイミングのズレ対策：少しだけリトライ
+    let tries = 0;
+    const tick = () => {
+      tries += 1;
+      const el = scrollContainerId
+        ? document.getElementById(scrollContainerId)
+        : null;
+
+      if (el || tries >= 6) {
+        attach();
+        return;
+      }
+      requestAnimationFrame(tick);
+    };
+
+    tick();
+
+    return () => {
+      if (typeof remove === "function") remove();
+    };
   }, [scrollContainerId]);
 
   const scrollToTop = () => {
-    const el = document.getElementById(scrollContainerId);
-    if (!el) return;
-    el.scrollTo({ top: 0, behavior: "smooth" });
-  };
+    // scrollContainer があるならそっち、なければ window
+    const el = scrollContainerId
+      ? document.getElementById(scrollContainerId)
+      : null;
 
-  const handleRightLinkClick = () => {
-    if (showBackToTop) {
-      scrollToTop(); // ★ ここで実行する（returnしない）
+    if (el) {
+      el.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    if (typeof onBackToSplash === "function") onBackToSplash();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const canBackToSplash = typeof onBackToSplash === "function";
+  const rightActionIsTop = showBackToTop;
+
+  const onRightAction = (e) => {
+    // クリック時に余計な挙動が乗るのを防ぐ（保険）
+    e?.preventDefault?.();
+
+    if (rightActionIsTop) {
+      scrollToTop();
+      return;
+    }
+    if (canBackToSplash) onBackToSplash();
   };
 
   return (
     <section
       style={{
-        marginTop: 16,
+        marginTop: 20,
         maxWidth: 480,
         marginLeft: "auto",
         marginRight: "auto",
         padding: "0 4px",
-        paddingBottom: 80, // ★ 下の余白（最後が被らない保険）
+        paddingBottom: 72,
       }}
     >
       {/* タイトル行（右側リンクは1つだけ） */}
@@ -85,21 +139,22 @@ function StepHistory({ steps = [], onBackToSplash, scrollContainerId }) {
           これまでの一歩
         </h3>
 
-        {typeof onBackToSplash === "function" && (
+        {/* スクロール後はトップに戻る／それ以外はスプラッシュに戻る */}
+        {(rightActionIsTop || canBackToSplash) && (
           <button
             type="button"
-            onClick={handleRightLinkClick}
+            onClick={showBackToTop ? scrollToTop : onBackToSplash}
             style={{
               border: "none",
               background: "transparent",
               padding: 0,
               fontSize: 12,
-              opacity: 0.7,
+              color: "rgba(255,255,255,0.85)", // ← 白指定
+              opacity: 0.75,
               textDecoration: "underline",
               textUnderlineOffset: 3,
               cursor: "pointer",
               whiteSpace: "nowrap",
-              color: "rgba(255,248,230,0.85)",
             }}
           >
             {showBackToTop ? "トップに戻る" : "スプラッシュに戻る"}

@@ -21,12 +21,12 @@ function clampBand(band) {
   return Math.max(0, Math.min(2, band));
 }
 
-function QuestionView({ origin, onBackToSplash }) {
+function QuestionView({ origin, onBackToSplash, initialPhase = "input" }) {
   const [answer, setAnswer] = useState("");
   const [steps, setSteps] = useState([]);
 
   // input | after | history
-  const [phase, setPhase] = useState("input");
+  const [phase, setPhase] = useState(initialPhase);
   const [fadeOut, setFadeOut] = useState(false);
 
   // 保存時に確定した余韻（after表示に使う）
@@ -34,8 +34,10 @@ function QuestionView({ origin, onBackToSplash }) {
   const [afterLabel, setAfterLabel] = useState("");
   const [afterMessage, setAfterMessage] = useState("");
 
+  // 初回ロード完了フラグ
   const hasLoadedRef = useRef(false);
 
+  // 起動時：steps を復元
   useEffect(() => {
     const raw = localStorage.getItem(STEPS_KEY);
     const restored = raw ? safeParse(raw) : [];
@@ -43,8 +45,10 @@ function QuestionView({ origin, onBackToSplash }) {
     hasLoadedRef.current = true;
   }, []);
 
+  // steps 更新時：保存（初回ロード前は保存しない）
   useEffect(() => {
     if (!hasLoadedRef.current) return;
+
     const id = window.requestAnimationFrame(() => {
       try {
         localStorage.setItem(STEPS_KEY, JSON.stringify(steps));
@@ -52,6 +56,7 @@ function QuestionView({ origin, onBackToSplash }) {
         console.warn("Failed to save steps to localStorage", e);
       }
     });
+
     return () => window.cancelAnimationFrame(id);
   }, [steps]);
 
@@ -89,6 +94,7 @@ function QuestionView({ origin, onBackToSplash }) {
 
   const clearHistory = () => {
     if (!window.confirm("履歴をすべて消しますか？（この端末のみ）")) return;
+
     setSteps([]);
     try {
       localStorage.removeItem(STEPS_KEY);
@@ -135,7 +141,7 @@ function QuestionView({ origin, onBackToSplash }) {
     <main style={styles.next}>
       <NorthStar origin={origin} />
 
-      {/* ===== 入力 ===== */}
+      {/* 入力 */}
       {phase === "input" && (
         <div style={styles.card}>
           <h2 style={styles.questionTitle}>今週の問い</h2>
@@ -170,7 +176,7 @@ function QuestionView({ origin, onBackToSplash }) {
         </div>
       )}
 
-      {/* ===== 余韻 ===== */}
+      {/* 余韻 */}
       {phase === "after" && (
         <div
           style={{
@@ -180,10 +186,6 @@ function QuestionView({ origin, onBackToSplash }) {
             textAlign: "center",
             marginTop: 40,
             whiteSpace: "pre-line",
-            maxWidth: 480,
-            marginLeft: "auto",
-            marginRight: "auto",
-            padding: "0 12px",
           }}
         >
           <p style={{ fontSize: 18, marginBottom: 12 }}>
@@ -195,25 +197,27 @@ function QuestionView({ origin, onBackToSplash }) {
         </div>
       )}
 
-      {/* ===== 履歴 ===== */}
+      {/* 履歴 */}
       {phase === "history" && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            padding: "48px 24px",
-            display: "flex",
-            flexDirection: "column",
-          }}
+          style={{ height: "100vh", display: "flex", flexDirection: "column" }}
         >
           {/* 上固定バー */}
-          <div style={{ maxWidth: 480, margin: "0 auto 10px", width: "100%" }}>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <div style={styles.historyTopBar}>
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 480,
+                display: "flex",
+                gap: 10,
+                padding: "0 4px",
+                alignItems: "center",
+              }}
+            >
               <button style={styles.historyButton} onClick={goToInput}>
                 問いに戻る
               </button>
 
-              {/* 小さめ */}
               <button
                 type="button"
                 style={styles.historyButtonDanger}
@@ -224,13 +228,12 @@ function QuestionView({ origin, onBackToSplash }) {
             </div>
           </div>
 
-          {/* スクロール領域（ここだけスクロール） */}
           <div
             id={HISTORY_SCROLL_ID}
             style={{
               flex: 1,
               overflowY: "auto",
-              paddingBottom: 24, // スクロール領域の保険
+              paddingBottom: 120,
             }}
           >
             <StepHistory

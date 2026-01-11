@@ -1,12 +1,31 @@
-// src/Splash.jsx
+// src/components/Splash.jsx
 import "./Splash.css";
 
-function Splash({ onFinish }) {
+function Splash({ onFinish, onGoHistory, onGoEditOrigin }) {
+  const handleGoHistory = (e) => {
+    e.stopPropagation();
+    if (typeof onGoHistory === "function") onGoHistory();
+  };
+
+  const handleGoEditOrigin = (e) => {
+    e.stopPropagation();
+    if (typeof onGoEditOrigin === "function") onGoEditOrigin();
+  };
+
   return (
     <main className="splashRoot" onClick={onFinish}>
-      {/* 背景演出 */}
-      <div className="moon" aria-hidden="true" />
-      <div className="northStar" aria-hidden="true" />
+      <button
+        type="button"
+        className="moonBtn"
+        aria-label="履歴へ"
+        onClick={handleGoHistory}
+      />
+      <button
+        type="button"
+        className="northStarBtn"
+        aria-label="原点を編集"
+        onClick={handleGoEditOrigin}
+      />
 
       {/* 本文 */}
       <h1 className="splashLogo">TRACE</h1>

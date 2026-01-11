@@ -1,41 +1,112 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Splash from "./components/Splash";
 import OriginSetup from "./components/OriginSetup";
 import QuestionView from "./components/QuestionView";
 
+const ORIGIN_KEY = "origin";
+
 function App() {
-  const [isSplash, setIsSplash] = useState(true);
+  // "splash" | "origin" | "question"
+  const [screen, setScreen] = useState("splash");
   const [origin, setOrigin] = useState(null);
 
+  // QuestionView を開くときの初期フェーズ（"input" | "history"）
+  const [qvInitialPhase, setQvInitialPhase] = useState("input");
+
+  // 原点を読む
   useEffect(() => {
-    const saved = localStorage.getItem("origin");
-    if (saved) setOrigin(JSON.parse(saved));
+    try {
+      const raw = localStorage.getItem(ORIGIN_KEY);
+      if (raw) setOrigin(JSON.parse(raw));
+    } catch {
+      // ignore
+    }
   }, []);
 
-  // ① Splash
-  if (isSplash) {
-    return <Splash onFinish={() => setIsSplash(false)} />;
-  }
+  const hasOrigin = useMemo(() => {
+    return Boolean(origin && origin.joy && origin.stubborn && origin.immerse);
+  }, [origin]);
 
-  // ② 原点がなければ必ずここ
-  if (!origin) {
+  // Splash クリック（通常開始）
+  const startFromSplash = () => {
+    if (hasOrigin) {
+      setQvInitialPhase("input");
+      setScreen("question");
+    } else {
+      setScreen("origin");
+    }
+  };
+
+  // Splash：北極星 → 原点編集
+  const goEditOrigin = () => {
+    setScreen("origin");
+  };
+
+  // Splash：月 → 履歴
+  const goHistory = () => {
+    if (!hasOrigin) {
+      setScreen("origin");
+      return;
+    }
+    setQvInitialPhase("history");
+    setScreen("question");
+  };
+
+  // 共通：スプラッシュへ戻る
+  const backToSplash = () => {
+    setScreen("splash");
+  };
+
+  // OriginSetup：保存
+  const onCompleteOrigin = (data) => {
+    try {
+      localStorage.setItem(ORIGIN_KEY, JSON.stringify(data));
+    } catch {
+      // ignore
+    }
+    setOrigin(data);
+    setQvInitialPhase("input");
+    setScreen("question");
+  };
+
+  // OriginSetup：削除
+  const onDeleteOrigin = () => {
+    try {
+      localStorage.removeItem(ORIGIN_KEY);
+    } catch {
+      // ignore
+    }
+    setOrigin(null);
+    setScreen("splash");
+  };
+
+  // 画面分岐（return はここで一箇所にまとめる）
+  if (screen === "splash") {
     return (
-      <OriginSetup
-        onComplete={(data) => {
-          localStorage.setItem("origin", JSON.stringify(data));
-          setOrigin(data);
-        }}
+      <Splash
+        onFinish={startFromSplash}
+        onGoHistory={goHistory}
+        onGoEditOrigin={goEditOrigin}
       />
     );
   }
 
-  // ③ 通常画面
+  if (screen === "origin") {
+    return (
+      <OriginSetup
+        initialOrigin={origin}
+        onComplete={onCompleteOrigin}
+        onDelete={onDeleteOrigin}
+        onBackToSplash={backToSplash}
+      />
+    );
+  }
+
   return (
     <QuestionView
       origin={origin}
-      onBackToSplash={() => {
-        setIsSplash(true);
-      }}
+      initialPhase={qvInitialPhase}
+      onBackToSplash={backToSplash}
     />
   );
 }
