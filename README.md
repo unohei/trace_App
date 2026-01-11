@@ -21,7 +21,7 @@ TRACE は
 ## 原点を置く
 
 <p align="center">
-  <img src="screenshots/origin.png" width="50%" />
+  <img src="screenshots/origin.png" width="40%" />
 </p>
 
 TRACE では最初に、  
@@ -32,7 +32,7 @@ TRACE では最初に、
 ## できること
 
 <p align="center">
-  <img src="screenshots/question.png" width="50%" />
+  <img src="screenshots/question.png" width="40%" />
 </p>
 
 - 今週の距離感を「言葉」で置く
@@ -41,7 +41,7 @@ TRACE では最初に、
 - これまでの一歩を、静かに振り返る
 
 <p align="center">
-  <img src="screenshots/history.png" width="50%" />
+  <img src="screenshots/history.png" width="40%" />
 </p>
 
 ※ 前回と距離カテゴリが変わった週は  
@@ -69,11 +69,3 @@ TRACE は成長を測るツールではありません。
 
 - React + Vite
 - State 管理：useState / useMemo
-
----
-
-## これから
-
-- 原点の再定義
-- 長期的な軌跡の可視化
-- 保存・共有機能
